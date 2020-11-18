@@ -1,0 +1,4 @@
+ofxNetwork
+ofxNetworkUtils
+ofxPoco
+ofxXmlSettings
