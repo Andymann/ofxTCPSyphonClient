@@ -19,7 +19,7 @@ char buff[1000];
 int iImagesizeFromHeaderData=0;
 int iStartOfImage = 0;
 
-bool bBlink = false;
+bool bBlink = true;
 
 string sTmp;
 
@@ -29,6 +29,7 @@ void ofApp::setup(){
     ofSetFrameRate(FRAMERATE);
     bConnected = tcpClient.setup("127.0.0.1", 9999);
     ofLogNotice("connect:" + ofToString(bConnected));
+    imgThread.setup();
 }
 
 void ofApp::exit() {
@@ -36,14 +37,13 @@ void ofApp::exit() {
 }
 
 void ofApp::update(){
-    bBlink=!bBlink;
-    /*
+    
     if( bBlink ){
         ofSetBackgroundColor(0, 0, 0);
     }else{
         ofSetBackgroundColor(200, 0, 0);
     }
-    */
+    
     
     if(bConnected){
         while(!bReceiveComplete){
@@ -78,6 +78,11 @@ void ofApp::update(){
                     //---know its size: iImagesizeFromHeaderData
                     if(iImagesizeFromHeaderData<=0){
                         ofLogNotice("HALT; FALSCH; AUS; ENDE");
+                        bBlink=!bBlink;
+                        bufImg.resize(0);
+                        bReceiveComplete=true;
+                        bFoundPictureStart=false;
+                        
                     }else{
                         if(bufImg.size()>= iStartOfImage + iImagesizeFromHeaderData){
                             //There it is...our received image;

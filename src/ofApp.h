@@ -1,7 +1,8 @@
 #pragma once
-
+ 
 #include "ofMain.h"
 #include "ofxTCPClient.h"
+#include "imageThread.h"
 
 class ofApp : public ofBaseApp{
 
@@ -25,4 +26,5 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 		
     ofxTCPClient tcpClient;
+    imageThread imgThread;
 };
