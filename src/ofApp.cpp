@@ -3,7 +3,7 @@
 static float FRAMERATE = 25.;
 static int MESSAGESIZE = 1000;
 
-static Boolean COMPRESS = true;
+static bool COMPRESS = true;
 static int COMPRESSION_TURBOJPEG = 0x04;
 static int COMPRESSION_JPEG = 0x00;
 
