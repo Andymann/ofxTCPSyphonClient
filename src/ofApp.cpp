@@ -7,36 +7,39 @@ static Boolean COMPRESS = true;
 static int COMPRESSION_TURBOJPEG = 0x04;
 static int COMPRESSION_JPEG = 0x00;
 
-ofImage imgOut;
-ofBuffer ofBuff;
-static std::vector<unsigned char> bufImg;
 
 
-bool bConnected = false;
-bool bReceiveComplete = false;
-bool bFoundPictureStart = false;
-char buff[1000];
-int iImagesizeFromHeaderData=0;
-int iStartOfImage = 0;
+
+//bool bConnected = false;
 
 bool bBlink = true;
-
 string sTmp;
+ofImage imgOutFromThread;
+
 
 //--------------------------------------------------------------
 void ofApp::setup(){
     //ofSetVerticalSync(true);
     ofSetFrameRate(FRAMERATE);
-    bConnected = tcpClient.setup("127.0.0.1", 9999);
-    ofLogNotice("connect:" + ofToString(bConnected));
-    imgThread.setup();
+    //bConnected = tcpClient.setup("127.0.0.1", 9999);
+//    ofLogNotice("connect:" + ofToString(bConnected));
+    imgThread.setup(MESSAGESIZE);
+    imgThread.start();
 }
 
 void ofApp::exit() {
     // stop the thread
+    imgThread.stop();
+    imgThread.waitForThread();
+    
 }
 
 void ofApp::update(){
+    
+    ofBuffer tmpImg = imgThread.getImageBuffer();
+    //if(tmpImg){
+        imgOutFromThread.load(tmpImg);
+    //}
     
     if( bBlink ){
         ofSetBackgroundColor(0, 0, 0);
@@ -44,83 +47,21 @@ void ofApp::update(){
         ofSetBackgroundColor(200, 0, 0);
     }
     
+    //imgOut = imgThread.imgInThread;
     
-    if(bConnected){
-        while(!bReceiveComplete){
-            tcpClient.receiveRawBytes( (char*) &buff[0], MESSAGESIZE);
-            
-            // store receive buffer into vector.
-            for(int i=0; i<MESSAGESIZE; i++){
-                bufImg.push_back(buff[i]);
-            }
-            //ofLogNotice(ofToString(char('\xd8')));   // \330
-            //ofLogNotice(ofToString(char('\xff')));   // \377
-            
-            if(bufImg.size()>=MESSAGESIZE){
-                
-                if(!bFoundPictureStart){
-                    //repeatedly check only the last 200 bytes
-                    for(int i=bufImg.size()-MESSAGESIZE; i<bufImg.size(); i++){
-                        //if(((char)bufImg[i]=='\xff') && ((char)bufImg[i+1]=='\xd8')){
-                        if((bufImg[i]==255) && (bufImg[i+1]==216)){
-                            bFoundPictureStart=true;
-                            iStartOfImage=i;
-                            iImagesizeFromHeaderData=(bufImg[i-3]<<8) + bufImg[i-4]-16;
-                            //ofLogNotice("ImageStart at " + ofToString(i) + " Size:" + ofToString(iImagesizeFromHeaderData));
-                            break;
-                        }else{
-                            //maybe later... for resource mgmt or such
-                            //vecBuff.erase(vecBuff.begin()+1);
-                        }
-                    }
-                }else{
-                    //---We found the beginnging of an image in bufImg and
-                    //---know its size: iImagesizeFromHeaderData
-                    if(iImagesizeFromHeaderData<=0){
-                        ofLogNotice("HALT; FALSCH; AUS; ENDE");
-                        bBlink=!bBlink;
-                        bufImg.resize(0);
-                        bReceiveComplete=true;
-                        bFoundPictureStart=false;
-                        
-                    }else{
-                        if(bufImg.size()>= iStartOfImage + iImagesizeFromHeaderData){
-                            //There it is...our received image;
-                            char tmpBuff[ iImagesizeFromHeaderData ];
-                            std::copy(&bufImg[iStartOfImage], &bufImg[iStartOfImage+iImagesizeFromHeaderData], tmpBuff);
-                            /*
-                             //----also Works, but might be slower
-                            for(int i=0; i<iImagesizeFromHeaderData; i++){
-                                tmpBuff[i] = *&bufImg[i+iStartOfImage];
-                            }
-                            */
-                            ofBuff.set((tmpBuff), iImagesizeFromHeaderData);
-                            imgOut.load(ofBuff);
-                            
-                            //----
-                            iImagesizeFromHeaderData = 0;
-                            bReceiveComplete = true;
-                            bFoundPictureStart = false;
-                            bufImg.resize(0);
-                        }else{
-                            // keep on recieving
-                            //ofSleepMillis(1);
-                        }
-                    }
-                }
-            }
-        }//while
-        bReceiveComplete = false;   //restart receiving
-    }
+    
+    
 }
 
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    if(imgOut.isAllocated()){
-        imgOut.draw(10,10);
+    
+    if(imgOutFromThread.isAllocated()){
+        imgOutFromThread.draw(10,10);
         //bReceiveComplete = false;   //restart receiving
     }
+    
 }
 
 //--------------------------------------------------------------
