@@ -33,9 +33,12 @@ void ofApp::exit() {
 
 void ofApp::update(){
     
-    vecImg.push_back(imgThread.getImageBuffer());
-    if(vecImg.size()>2){
-        imgOutFromThread.load(vecImg[0]);
+    if(vecImg.size()<2){
+        vecImg.push_back(imgThread.getImageBuffer());
+    }else{
+        if(vecImg[0].size()>1){
+            imgOutFromThread.load(vecImg[0]);
+        }
         vecImg.erase(vecImg.begin());
     }
     

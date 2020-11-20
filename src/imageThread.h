@@ -21,7 +21,7 @@ public:
     void setup(int pMessageSize){
         //receiver.setup(port);
         MESSAGESIZE = pMessageSize;
-        bConnected = tcpClient.setup("127.0.0.1", 9999);
+        bConnected = tcpClient.setup("192.168.178.43", 9999);
         ofLogNotice("connect:" + ofToString(bConnected));
     }
     
