@@ -8,14 +8,11 @@ static int COMPRESSION_TURBOJPEG = 0x04;
 static int COMPRESSION_JPEG = 0x00;
 
 
-
-
-//bool bConnected = false;
-
 bool bBlink = true;
 string sTmp;
 ofImage imgOutFromThread;
 
+vector<ofBuffer> vecImg;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -36,9 +33,16 @@ void ofApp::exit() {
 
 void ofApp::update(){
     
-    ofBuffer tmpImg = imgThread.getImageBuffer();
+    vecImg.push_back(imgThread.getImageBuffer());
+    if(vecImg.size()>2){
+        imgOutFromThread.load(vecImg[0]);
+        vecImg.erase(vecImg.begin());
+    }
+    
+    
+    
     //if(tmpImg){
-        imgOutFromThread.load(tmpImg);
+    //    imgOutFromThread.load(tmpImg);
     //}
     
     if( bBlink ){
