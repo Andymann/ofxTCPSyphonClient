@@ -85,9 +85,12 @@ public:
                                         //for(int i=0; i<iImagesizeFromHeaderData; i++){
                                         //    tmpBuff[i] = *&bufImg[i+iStartOfImage];
                                         //}
-                                        bCopyingToBuffer=true;
-                                        ofBuff.set((tmpBuff), iImagesizeFromHeaderData);
-                                        bCopyingToBuffer=false;
+                                        if((char)tmpBuff[iImagesizeFromHeaderData-1]=='\xd9'  ){
+                                            bCopyingToBuffer=true;
+                                            ofBuff.set((tmpBuff), iImagesizeFromHeaderData);
+                                            bCopyingToBuffer=false;
+                                        }
+                                        
                                         //imgInThread.load(ofBuff);
                                         ///ofBufferToFile("data.jpg", ofBuff);
                                         
